@@ -1,0 +1,71 @@
+/* 
+   GIUSEPPE SCOLLO AUTOMATIC CUSTOM LABEL BASE ON ITEM ID PERFORMANCE
+	copyright by giuseppescollo.it
+   ---------------------------------------
+
+	Operating instructions
+
+	CREATE AND MODIFIDY SHEET
+	1. Create a copy of this spreadsheet 1 (Copy - Automatic Report ID Performance)
+	https://docs.google.com/spreadsheets/d/1z4TTGxeFdsqK130_Vioviupil_BrkR2rjtAuclvA5zc/copy
+
+	2. Create a copy of this spreadsheet 2 (Copy - Supplementary feed - Custom Label 0)
+	https://docs.google.com/spreadsheets/d/1NvGwtNTMzHLrqeSwOWIH8xxHgxdrBFJwx3AU3Pp1rGA/copy
+
+	3. In Spreadsheets 2 update Cell A1 with the url of spreadsheet 1 in this formula:
+	=IMPORTRANGE("URL SPREASHEET 1","foglio1!A:I")
+
+	4. Click Allow access to connect the 2 spreadsheets
+
+	5. In spreadsheet 2, sheet "parametri", modify the sheet parameters, to define the different label:
+		- low clicks,
+		- low impressions, 
+		- low ctr
+		- low ROAS.
+
+	6. This spreadsheet 2 works until 20.000 item id. If you have more than 20.000 you have to modify the sheet:
+	(sheet1: copy the formula in j2 in all columns J and do the sam in K)
+
+
+	SCRIPT AND GOOGLE ADS
+	7. In this script update the line with url spreadsheet 1: 'spreadsheetUrl': 'url spreadsheet 1',
+
+	8. Paste this script on google ads account and update everyday
+
+
+	MERCHANT CENTER
+	9. Upload as supplementary sheet in your merchant center the spreasheet 2 and fetch the this supplementary feed every day (1 hour after the scheduling of the google ads script)
+
+	10 Create a rule that for "custom_label_0" that assign a costant like "no data" or similar if this attribute doesn't still have a value.
+
+
+
+
+*/ 
+var CONFIG = {
+  'attributes': ['OfferId'],
+  'metrics': ['Impressions', 'Clicks', 'Ctr', 'Cost', 'AverageCpc', 'Conversions', 'CostPerConversion', 'ConversionValue'],
+  'sourceReport': 'SHOPPING_PERFORMANCE_REPORT',
+  'dateRange': 'LAST_30_DAYS',
+  'spreadsheetUrl': 'url spreadsheet 1', // insert spreadsheet url 
+  'tabName': 'Campaigns',
+  'reportVersion': 'v201809',
+  'overWrite': 1,
+};
+
+function main() {
+  var fields = [].concat(CONFIG['attributes'], CONFIG['metrics']);
+  var query = "SELECT " + fields.join(',') + " FROM " + CONFIG['sourceReport'] + " DURING " + CONFIG['dateRange'];
+  var report = AdsApp.report(query);
+  if(CONFIG['overWrite']) {
+    var spreadsheet = SpreadsheetApp.openByUrl(CONFIG['spreadsheetUrl']);
+    var sheet = spreadsheet.getSheetByName(CONFIG['tabName']);
+    report.exportToSheet(spreadsheet.getActiveSheet());
+  } else {
+    var rows = report.rows();
+    while (rows.hasNext()) {
+      var row = rows.next();
+      sheet.appendRow(row);
+    }
+  }
+}

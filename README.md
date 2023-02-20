@@ -1,2 +1,2 @@
 # giuseppescollo.it
-Google Ads script made by a NOT developer
+Google Ads Script made by a NOT developer. 
